@@ -3,6 +3,8 @@ const $=s=>document.querySelector(s), money=n=>new Intl.NumberFormat('pl-PL',{st
 const today=()=>{const d=new Date();return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`};
 const defaults={profiles:[],fuel:5.85,thresholds:{great:2.5,ok:1.5},orders:[],days:{},active:null};
 let state=load(),tab='work',selectedDate=today(),appFilter='Wszystkie',formPlatform='Glovo',toastTimer;
+// Compatibility: if an older build saved a starting odometer but no orders exist, force the daily baseline to zero.
+if(state.active && !state.orders.some(o=>o.date===state.active.date)) state.active.lastKm=0;
 function load(){try{const raw=JSON.parse(localStorage.getItem('deliverymate-data')||'{}');return {...structuredClone(defaults),...raw,thresholds:{...defaults.thresholds,...raw.thresholds}}}catch{return structuredClone(defaults)}}
 function save(){try{localStorage.setItem('deliverymate-data',JSON.stringify(state))}catch(e){notify('Nie udało się zapisać danych w pamięci urządzenia.')}}
 function notify(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.classList.remove('show'),2600)}
